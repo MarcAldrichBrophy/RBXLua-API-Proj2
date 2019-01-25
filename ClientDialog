@@ -1,0 +1,98 @@
+script.Parent.Speaker.Text = script.Parent.Config.Speaker.Value
+
+for i,v in pairs(script.Parent.Lines:GetChildren()) do
+	v.Text = ""
+end
+
+set1 = script.Parent.Config.Set1
+set2 = script.Parent.Config.Set2
+
+Lines = script.Parent.Lines
+
+db = false
+for i = 1,4 do
+	local textSet = set1:FindFirstChild("Line".. i).Value
+	local len = string.len(textSet)
+	local box = Lines:FindFirstChild("Line".. i)
+	for a = 1,len,1 do
+		box.Text = string.sub(textSet,1,a)
+		script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+		script.Parent.Talk:Play()
+		wait(.01)
+	end
+end
+	
+	
+--[[
+for a = 1,len,1 do
+	box.Text = string.sub(textSet1,1,a)
+	script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+	script.Parent.Talk:Play()
+	wait(.01)
+end
+local len = string.len(textSet2)
+local box = Lines.Line2
+for a = 1,len,1 do
+	box.Text = string.sub(textSet2,1,a)
+	script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+	script.Parent.Talk:Play()
+	wait(.01)
+end
+local len = string.len(textSet3)
+local box = Lines.Line3
+for a = 1,len,1 do
+	box.Text = string.sub(textSet3,1,a)
+	script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+	script.Parent.Talk:Play()
+	wait(.01)
+end
+local len = string.len(textSet4)
+local box = Lines.Line4
+for a = 1,len,1 do
+	box.Text = string.sub(textSet4,1,a)
+	script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+	script.Parent.Talk:Play()
+	wait(.01)
+end
+]]--
+
+UIS = game:GetService("UserInputService")
+UIS.InputBegan:connect(function(Input, gameProcessed)
+	local MouseInput = Input.UserInputType
+	local KeyCode = Input.KeyCode
+	if gameProcessed then return end
+	if db == false then return end
+	if KeyCode == Enum.KeyCode.Space then
+		print("space pressed.")
+		if db == false then
+			db = true
+			for i = 1,4 do
+				local textSet = set2:FindFirstChild("Line".. i).Value
+				local len = string.len(textSet)
+				local box = Lines:FindFirstChild("Line".. i)
+				for a = 1,len,1 do
+					box.Text = string.sub(textSet,1,a)
+					script.Parent:WaitForChild("Talk").Pitch = math.random(0.5,1.5)
+					script.Parent.Talk:Play()
+					wait(.01)
+				end
+			end
+		else
+			for i,v in pairs(workspace.NPCs:GetChildren()) do
+				if v == script.Parent.Config.npc.Value then
+					v.Event:FireServer("exit")
+				end
+			end
+			script.Parent.Parent:Destroy()
+		end
+	end
+end)
+
+
+--[[
+for i,v in pairs(workspace.NPCs:GetChildren()) do
+	if v == script.Parent.Config.npc.Value then
+		v.Event:FireServer("exit")
+	end
+end
+script.Parent.Parent:Destroy()]]--
