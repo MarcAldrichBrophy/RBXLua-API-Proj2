@@ -1,0 +1,92 @@
+
+customEvent = script.Parent:WaitForChild("CustomEvent")
+servStore = game:GetService("ServerStorage")
+startPlayer = game:GetService("StarterPlayer")
+sss = game:GetService("ServerScriptService")
+sAttach = require(sss.CharacterFunctions.WarriorWelds)
+
+customEvent.Event:connect(function(plr, msg)
+	if msg ~= "initial" then return end
+	
+	local plrF = plr:WaitForChild("StorageReader")
+	local character = plr.Character
+	if not character or not character.Parent then
+	    character = plr.CharacterAdded:wait()
+	end
+	local grabMage = servStore.PlayerModels.Mage
+	local grabWar = servStore.PlayerModels.Warrior
+	grabMage.Default:GetChildren()
+	grabWar.Default:GetChildren()
+	plr:WaitForChild("PlayerGui")
+	
+	if plrF.CCFolder.ClassNum.Value == 1 then			----MAGE CLASS
+			print("catching mage2")
+			for i,v in pairs(game.StarterPlayer:GetChildren()) do
+				if v.ClassName == "Model" then
+					v:Destroy()
+				end
+			end
+			grabMage.Animate:Clone().Parent = startPlayer.StarterCharacterScripts
+			grabMage.Combat:Clone().Parent = startPlayer.StarterCharacterScripts
+			grabMage.Default:WaitForChild("StarterCharacter"):Clone().Parent = startPlayer
+			character = plr.Character
+			plr:LoadCharacter()
+			plr.Character.HumanoidRootPart.CFrame = workspace.__WORLDSPAWN.CFrame * CFrame.new(0,5,0)
+			local character = plr.Character
+			if not character or not character.Parent then
+			    character = plr.CharacterAdded:wait()
+			end
+			
+			local hat = servStore.PlayerModels.Mage.Default:WaitForChild("Hat"):Clone()
+			hat.Parent = character
+			hat:SetPrimaryPartCFrame(character.Head.CFrame + Vector3.new(0,0,0))
+			local weld = Instance.new('Weld', hat)
+			weld.Part0 = character.Head
+			weld.part1 = hat.Base
+			weld.C1 = CFrame.new(.1,-.6,0) * CFrame.Angles(0,math.rad(90),0) * CFrame.Angles(-math.rad(20),0,0)
+			
+			local bp = grabMage.Default:WaitForChild("Backpack"):Clone()
+			bp.Parent = character
+			bp:SetPrimaryPartCFrame(character.Torso.CFrame + Vector3.new(0,0,0))
+			local weld = Instance.new('Weld', bp)
+			weld.Part0 = character.Torso
+			weld.part1 = bp.Base
+			weld.C1 = CFrame.new(0,0,-.85)
+			bp.Handler.Disabled = false
+			
+			plr.Inv.EquippedSlots.MainWeapon.Value = "Basic Staff"
+			print("finished mage")
+		elseif plrF.CCFolder.ClassNum.Value == 2 then				--- WARRIOR CLASS
+			for i,v in pairs(game.StarterPlayer:GetChildren()) do
+				if v.ClassName == "Model" then
+					v:Destroy()
+				end
+			end
+			grabWar.Animate:Clone().Parent = startPlayer.StarterCharacterScripts
+			grabWar.Combat:Clone().Parent = startPlayer.StarterCharacterScripts
+			grabWar.Default:WaitForChild("StarterCharacter"):Clone().Parent = startPlayer
+			plr:LoadCharacter()
+			plr.Character.HumanoidRootPart.CFrame = workspace.__WORLDSPAWN.CFrame * CFrame.new(0,5,0)
+			local character = plr.Character
+			if not character or not character.Parent then
+			    character = plr.CharacterAdded:wait()
+			end
+			
+			local hair = grabWar.Hairs.Bun:Clone()
+			hair.Parent = character
+			local weld = Instance.new('Weld', hair.Base)
+			weld.Part0 = character.Head
+			weld.Part1 = hair.Base
+			weld.C1 = CFrame.new(0,-.25,-.2)
+			plr:WaitForChild("Inv")
+			
+			plr.Inv.EquippedSlots.MainWeapon.Value = "Training Sword"
+			plr.Inv.EquippedSlots.Secondary.Value = grabWar.Shields:WaitForChild("Leather Shield").Name
+			sAttach.AttachSheath(plr, plr.Inv.EquippedSlots.MainWeapon.Value)
+			
+			
+		end
+		print("FINISHED INTIALIZATION")
+		
+		customEvent:Fire(plr, "custom")
+end)
