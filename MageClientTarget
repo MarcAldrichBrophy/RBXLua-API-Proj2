@@ -1,0 +1,38 @@
+repStore = game:GetService("ReplicatedStorage")
+plr = game.Players.LocalPlayer
+mouse = plr:GetMouse()
+
+target = repStore.Elements.MagicEffects:WaitForChild("AOETarget"):Clone()
+target.Parent = plr.Character
+target.Transparency = .3
+
+distance = repStore.Elements.MagicEffects:WaitForChild("Distance"):Clone()
+distance.Parent = target
+
+
+distance:WaitForChild("LocalScript").Range.Value = 45
+
+
+
+a = 0
+game:GetService("RunService"):BindToRenderStep(
+	"UpdateTarget",
+	Enum.RenderPriority.Character.Value,
+	function()
+	--target.CFrame = CFrame.new(math.atan2(mouse.Hit.X),math.atan2(mouse.Hit.Y),math.atan2(mouse.Hit.Z))
+	a = a + 1
+	target.CFrame = CFrame.new(mouse.Hit.X,mouse.Hit.Y,mouse.Hit.Z) * CFrame.Angles(math.rad(0),math.rad(a), math.rad(90))
+	local root = plr.Character.HumanoidRootPart
+	distance.CFrame = CFrame.new(root.Position.X, root.Position.Y - 2.8, root.Position.Z) * CFrame.Angles(0,0,math.rad(90))
+	if distance:FindFirstChild("LocalScript") then
+		if plr:DistanceFromCharacter(target.Position) > distance:WaitForChild("LocalScript").Range.Value/2 then
+			target.Transparency = 1
+		else
+			target.Transparency = .3
+		end
+	end
+	wait()
+	if a >= 360 then
+		a = 0
+	end
+end)
