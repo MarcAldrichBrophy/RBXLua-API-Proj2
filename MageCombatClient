@@ -1,0 +1,109 @@
+local PlayerUI = game.Players.LocalPlayer.PlayerGui
+
+plr = game.Players.LocalPlayer
+
+local character = plr.Character
+if not character or not character.Parent then
+    character = plr.CharacterAdded:wait()
+end
+mouse = plr:GetMouse()
+script:WaitForChild("Equip")
+--script:WaitForChild("Shield")
+script:WaitForChild("Dequip")
+--script:WaitForChild("Bash")
+--script:WaitForChild("Roll")
+local UIS = game:GetService("UserInputService")
+repStore = game:GetService("ReplicatedStorage")
+sprintRemote = repStore.RemoteFolder.GpRemotes:WaitForChild("sprintRemote")
+shieldRemote = repStore.RemoteFolder.GpRemotes:WaitForChild("shieldRemote")
+reactRemote = repStore.RemoteFolder.GpRemotes:WaitForChild("reactRemote")
+UIchanger = repStore.RemoteFolder.CoreRemotes:WaitForChild("UIchanger")
+--Animations
+equipAnim = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Equip)
+dequipAnim = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Dequip)
+--shieldBlock = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Shield)
+--bash = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Bash)
+--roll = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Roll)
+--flinch = plr.Character:WaitForChild("Humanoid"):LoadAnimation(script.Flinch)
+--magicModule = require(repStore.repScripts.clientModules.magicModule)
+
+
+local db = false
+local sdb = false
+local rdb = false
+
+--Combat
+UIS.InputBegan:connect(function(Input, gameProcessed)
+	local KeyCode = Input.KeyCode
+	if gameProcessed then return end
+	if KeyCode == Enum.KeyCode.F then
+		if db == true then return end
+		db = true
+		local weapon = plr.Inv.EquippedSlots.MainWeapon.Value
+		if plr.combat.Value == false then
+			script.PointCharacterToMouse.Disabled = false
+			equipAnim:Play()
+			PlayerUI.UnSheatheSword:Play()
+		elseif plr.combat.Value == true then
+			local root = character:WaitForChild("HumanoidRootPart")
+			local rootgyro = root:FindFirstChild("rootgyro")
+			if rootgyro then
+				rootgyro:Remove()
+			end
+			script.PointCharacterToMouse.Disabled = true
+			character.Humanoid.AutoRotate = true
+			dequipAnim:Play()
+			shieldRemote:FireServer("Stop")
+			PlayerUI.SheatheSword:Play()
+		end
+		sprintRemote:FireServer("End")
+		game.ReplicatedStorage.RemoteEvent:FireServer(weapon)
+		wait(1.5)
+		db = false
+	end
+end)
+		
+--XBOX 1
+
+UIS.InputBegan:connect(function(Input, gameProcessed)
+	local KeyCode = Input.KeyCode
+	if gameProcessed then return end
+	if Input.UserInputType == Enum.UserInputType.Gamepad1 then
+		if KeyCode == Enum.KeyCode.ButtonY then
+			if db == true then return end
+			db = true
+			local weapon = plr.Inv.EquippedSlots.MainWeapon.Value
+			if plr.combat.Value == false then
+				script.PointCharacterToMouse.Disabled = false
+				equipAnim:Play()
+				PlayerUI.UnSheatheSword:Play()
+			elseif plr.combat.Value == true then
+				local root = character:WaitForChild("HumanoidRootPart")
+				local rootgyro = root:FindFirstChild("rootgyro")
+				if rootgyro then
+					rootgyro:Remove()
+				end
+				script.PointCharacterToMouse.Disabled = true
+				character.Humanoid.AutoRotate = true
+				dequipAnim:Play()
+				shieldRemote:FireServer("Stop")
+				PlayerUI.SheatheSword:Play()
+			end
+			sprintRemote:FireServer("End")
+			game.ReplicatedStorage.RemoteEvent:FireServer(weapon)
+			wait(1.5)
+			db = false
+		end
+	end
+end)
+
+
+reactRemote.OnClientEvent:connect(function()
+	--flinch:Play()
+end)
+
+
+game.ReplicatedStorage.Update.OnClientEvent:Connect(function()
+	plr.PlayerScripts.CameraScript.Disabled = true
+	plr.PlayerScripts.CameraScript.Disabled = false
+end)
