@@ -1,0 +1,130 @@
+local module = {}
+repStore = game:GetService("ReplicatedStorage")
+reactRemote = repStore.RemoteFolder.GpRemotes:WaitForChild("reactRemote")
+
+function module.ShieldBash(plr,msg,Handle,damage)
+	local enemy = "Monster"
+	local character = plr.Character
+	if not character then return end
+	for i,v in pairs(plr.Character:GetChildren()) do
+		if v.ClassName == "Tool" then
+			tool = v
+		end
+	end
+	if not tool then return end
+	tool.Config:WaitForChild("CanAttack")
+	if tool.Config.CanAttack.Value == true then return end
+	if msg == "Bash" then
+		plr.combatSet.isBash.Value = true
+		tool.Config.DmgPrevent.Value = true
+		Handle.Touched:Connect(function(hit)
+			local ehum = hit.Parent:FindFirstChild(enemy)
+			if ehum then
+				if ehum ~= character.Humanoid then
+					if plr.combatSet.isBash.Value == false then return end
+					plr.combatSet.isBash.Value = false
+					tool.Config.DmgPrevent.Value = false
+					ehum:TakeDamage(damage)
+					
+					local _plr = nil
+					
+					if game.Players:GetPlayerFromCharacter(ehum.Parent) then
+						local _plr = game.Players:GetPlayerFromCharacter(ehum.Parent)
+					end
+					
+					if _plr then
+						if _plr.combatSet.isBlock.Value == false then
+							local tool = nil
+							for i,v in pairs(_plr.Character:GetChildren()) do
+								if v.ClassName == "Tool" then
+									tool = v
+								end
+							end
+							if tool ~= nil then
+								tool.Config.DmgPrevent.Value = true
+							end
+							reactRemote:FireClient(_plr)
+							ehum:TakeDamage(damage * 2)
+						end
+					else
+						if enemy == "Monster" then
+							ehum:TakeDamage(damage * 2)
+						else
+							ehum:TakeDamage(damage)
+						end
+					end
+				end
+			end
+		end)
+		wait(1)
+		plr.combatSet.isBash.Value = false
+		tool.Config.DmgPrevent.Value = false
+	end
+end
+
+
+
+
+function module.SwordSlash(plr, tool, damage)
+	
+	local enemy = "Monster"
+	if plr.combatSet.isBlock.Value == true then return end
+	if tool.Config.DmgPrevent.Value == true then return end
+	if plr.combatSet.isRolling.Value == true then return end
+	tool.Handle.Trail.Enabled = true
+	wait(0.0625)
+	if plr.combatSet.isRolling.Value == true then
+		tool.Handle.Trail.Enabled = false
+	end
+	wait(0.0625)
+	if plr.combatSet.isRolling.Value == true then
+		tool.Handle.Trail.Enabled = false
+	end
+	if plr.combatSet.isRolling.Value == false then
+		tool.Config.CanAttack.Value = true
+	end
+	
+	local db = true
+	tool.Handle.Touched:Connect(function(hit)
+		if tool.Config.CanAttack.Value == false then return end
+		local ehum = hit.Parent:FindFirstChild(enemy)
+		
+		local function addtag(par)
+			local tagFolder = ehum.Parent:FindFirstChild("tagFolder")
+			if not tagFolder:FindFirstChild(plr.Name) then
+				local tag = Instance.new("IntValue", tagFolder)
+				tag.Name = plr.Name
+				tag.Value = par
+			elseif tagFolder:FindFirstChild(plr.Name) then
+				local tag = tagFolder:FindFirstChild(plr.Name)
+				tag.Value = tag.Value + par
+			end
+		end
+		
+		if ehum and hit.Name ~= "_ShieldBox" and plr.combatSet.isRolling.Value == false then
+			ehum:TakeDamage(damage)
+			tool.Handle.Hit:Play()
+			tool.Config.CanAttack.Value = false
+			addtag(damage)
+		elseif hit.Name == "_ShieldBox" and plr.combatSet.isRolling.Value == false then
+			local resistance = hit.Parent.Config.Dampening.Value
+			damage = damage / resistance
+			ehum:TakeDamage(damage)
+			addtag(damage)
+			--[[local _plr = game.Players:GetPlayerFromCharacter(hit.Parent.Parent.Parent)
+			if _plr.combatSet.isBlock.Value == false then return end
+			local ehum = _plr.Character.Humanoid
+			ehum:TakeDamage(damage / resistance)
+			tool.Handle.ShieldHit:Play()
+			tool.Config.CanAttack.Value = false]]--
+			
+		end
+		
+	end)
+	wait(0.5)
+	tool.Handle.Trail.Enabled = false
+	tool.Config.CanAttack.Value = false
+	
+end
+
+return module
